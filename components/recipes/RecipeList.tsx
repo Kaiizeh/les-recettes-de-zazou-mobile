@@ -1,4 +1,8 @@
-import { FlatList, View } from 'react-native';
+import { View } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedScrollHandler,
+} from 'react-native-reanimated';
 import { RecipeCard } from './RecipeCard';
 import { RecipeListSkeleton } from './RecipeCardSkeleton';
 import { EmptyState } from './EmptyState';
@@ -19,6 +23,14 @@ export function RecipeList({
   onToggleFavorite,
   onResetFilters,
 }: RecipeListProps) {
+  const scrollY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
   if (isLoading) {
     return <RecipeListSkeleton />;
   }
@@ -28,18 +40,22 @@ export function RecipeList({
   }
 
   return (
-    <FlatList
+    <Animated.FlatList
       data={recipes}
       keyExtractor={(item) => item.id}
       contentContainerStyle={{ gap: 16, paddingHorizontal: 16, paddingBottom: 32 }}
-      renderItem={({ item }) => (
+      renderItem={({ item, index }) => (
         <RecipeCard
           recipe={item}
           onPress={() => onRecipePress(item)}
           onToggleFavorite={onToggleFavorite}
+          scrollY={scrollY}
+          index={index}
         />
       )}
       showsVerticalScrollIndicator={false}
+      onScroll={scrollHandler}
+      scrollEventThrottle={16}
     />
   );
 }

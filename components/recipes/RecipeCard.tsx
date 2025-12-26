@@ -1,10 +1,12 @@
-import { View, Image, Pressable } from 'react-native';
+import { View, Pressable, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSequence,
   withTiming,
   Easing,
+  interpolate,
+  SharedValue,
 } from 'react-native-reanimated';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +20,8 @@ interface RecipeCardProps {
   recipe: Recipe;
   onPress: () => void;
   onToggleFavorite: (id: string) => void;
+  scrollY: SharedValue<number>;
+  index: number;
 }
 
 const DIFFICULTY_STYLES = {
@@ -33,12 +37,31 @@ function formatTime(minutes: number): string {
   return mins > 0 ? `${hours}h${mins}` : `${hours}h`;
 }
 
-export function RecipeCard({ recipe, onPress, onToggleFavorite }: RecipeCardProps) {
+// Constantes pour le calcul du parallax
+const CARD_HEIGHT = 280; // Hauteur approximative d'une carte (image + contenu)
+const CARD_GAP = 16;
+const PARALLAX_AMOUNT = 15; // Pixels de déplacement parallax
+
+export function RecipeCard({ recipe, onPress, onToggleFavorite, scrollY, index }: RecipeCardProps) {
+  const { height: screenHeight } = useWindowDimensions();
   const difficultyStyle = DIFFICULTY_STYLES[recipe.difficulty];
 
   // Animation blob/morphing pour le bouton favoris
   const scale = useSharedValue(1);
   const rotate = useSharedValue(0);
+
+  // Animation parallax pour l'image
+  const imageAnimatedStyle = useAnimatedStyle(() => {
+    const cardOffset = index * (CARD_HEIGHT + CARD_GAP);
+    const translateY = interpolate(
+      scrollY.value,
+      [cardOffset - screenHeight, cardOffset + CARD_HEIGHT],
+      [-PARALLAX_AMOUNT, PARALLAX_AMOUNT]
+    );
+    return {
+      transform: [{ translateY }, { scale: 1.1 }],
+    };
+  });
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }, { rotate: `${rotate.value}deg` }],
@@ -66,12 +89,13 @@ export function RecipeCard({ recipe, onPress, onToggleFavorite }: RecipeCardProp
   return (
     <Pressable onPress={onPress} accessibilityRole="button">
       <Card className="overflow-hidden rounded-2xl">
-        {/* Image container with 16:10 aspect ratio */}
-        <View className="relative" style={{ aspectRatio: 16 / 10 }}>
-          <Image
+        {/* Image container with 16:10 aspect ratio and overflow hidden for parallax */}
+        <View className="relative overflow-hidden" style={{ aspectRatio: 16 / 10 }}>
+          <Animated.Image
             source={{ uri: recipe.imageUrl }}
             className="absolute inset-0 h-full w-full"
             resizeMode="cover"
+            style={imageAnimatedStyle}
           />
           {/* Favorite button with blob/morphing animation */}
           <Animated.View style={animatedStyle} className="absolute right-3 top-3">
