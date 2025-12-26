@@ -12,7 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
-import { Clock, Heart, Bot, Download, Star } from 'lucide-react-native';
+import { Clock, Bookmark, Bot, Download, Star } from 'lucide-react-native';
 import type { Recipe } from '@/types/recipe';
 import { cn } from '@/lib/utils';
 
@@ -108,10 +108,10 @@ export function RecipeCard({ recipe, onPress, onToggleFavorite, scrollY, index }
               }
             >
               <Icon
-                as={Heart}
+                as={Bookmark}
                 size={22}
-                className={recipe.isFavorite ? 'text-red-500' : 'text-muted-foreground'}
-                fill={recipe.isFavorite ? '#ef4444' : 'none'}
+                className={recipe.isFavorite ? 'text-primary' : 'text-foreground'}
+                fill={recipe.isFavorite ? '#2D5A4A' : 'none'}
               />
             </Pressable>
           </Animated.View>
