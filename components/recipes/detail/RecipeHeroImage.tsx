@@ -9,9 +9,10 @@ import Animated, {
 interface RecipeHeroImageProps {
   imageUrl: string;
   scrollY: SharedValue<number>;
+  recipeId: string;
 }
 
-export function RecipeHeroImage({ imageUrl, scrollY }: RecipeHeroImageProps) {
+export function RecipeHeroImage({ imageUrl, scrollY, recipeId }: RecipeHeroImageProps) {
   const imageAnimatedStyle = useAnimatedStyle(() => {
     const translateY = interpolate(
       scrollY.value,
@@ -31,6 +32,7 @@ export function RecipeHeroImage({ imageUrl, scrollY }: RecipeHeroImageProps) {
         className="absolute inset-0 h-full w-full"
         resizeMode="cover"
         style={imageAnimatedStyle}
+        sharedTransitionTag={`recipe-image-${recipeId}`}
       />
     </View>
   );

@@ -62,7 +62,7 @@ export default function RecipeDetailScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         {/* Hero image */}
-        <RecipeHeroImage imageUrl={recipe.imageUrl} scrollY={scrollY} />
+        <RecipeHeroImage imageUrl={recipe.imageUrl} scrollY={scrollY} recipeId={recipe.id} />
 
         {/* Content container with bottom sheet effect */}
         <View className="-mt-6 rounded-t-3xl bg-background">

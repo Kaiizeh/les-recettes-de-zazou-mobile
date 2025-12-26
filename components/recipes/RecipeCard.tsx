@@ -96,6 +96,7 @@ export function RecipeCard({ recipe, onPress, onToggleFavorite, scrollY, index }
             className="absolute inset-0 h-full w-full"
             resizeMode="cover"
             style={imageAnimatedStyle}
+            sharedTransitionTag={`recipe-image-${recipe.id}`}
           />
           {/* Favorite button with blob/morphing animation */}
           <Animated.View style={animatedStyle} className="absolute right-3 top-3">
