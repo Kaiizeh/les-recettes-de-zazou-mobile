@@ -10,6 +10,36 @@ export type FilterTag =
   | 'Plat Principal'
   | 'Entree';
 
+export type IngredientUnit =
+  | 'g'
+  | 'kg'
+  | 'ml'
+  | 'L'
+  | 'cl'
+  | 'cuillere a soupe'
+  | 'cuillere a cafe'
+  | 'piece'
+  | 'pincee'
+  | 'gousse'
+  | 'tranche'
+  | 'feuille';
+
+export interface Ingredient {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: IngredientUnit;
+  isOptional?: boolean;
+}
+
+export interface RecipeStep {
+  id: string;
+  stepNumber: number;
+  instruction: string;
+  imageUrl?: string;
+  timerMinutes?: number;
+}
+
 export interface Recipe {
   id: string;
   name: string;
@@ -25,6 +55,9 @@ export interface Recipe {
   isFavorite: boolean;
   tags: FilterTag[];
   description?: string;
+  originalPortions: number;
+  ingredients: Ingredient[];
+  steps: RecipeStep[];
 }
 
 export interface RecipeFilters {

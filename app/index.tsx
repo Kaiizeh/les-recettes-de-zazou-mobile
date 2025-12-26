@@ -5,7 +5,7 @@ import { SearchBar } from '@/components/recipes/SearchBar';
 import { FilterTags } from '@/components/recipes/FilterTags';
 import { RecipeList } from '@/components/recipes/RecipeList';
 import { useRecipeFilters } from '@/hooks/useRecipeFilters';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { MoonStarIcon, SunIcon } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useState, useEffect } from 'react';
@@ -33,8 +33,7 @@ export default function HomeScreen() {
   }, []);
 
   const handleRecipePress = (recipe: Recipe) => {
-    // TODO: Navigate to recipe detail
-    console.log('Navigate to recipe:', recipe.id);
+    router.push(`/recipe/${recipe.id}`);
   };
 
   return (
