@@ -1,11 +1,17 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { recipeStorage } from '@/lib/storage';
 
 export function useIngredientChecks(recipeId: string) {
-  const [checkedIds, setCheckedIds] = useState<Set<string>>(() => {
-    const stored = recipeStorage.getCheckedIngredients(recipeId);
-    return new Set(stored);
-  });
+  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Charger depuis AsyncStorage au montage
+  useEffect(() => {
+    recipeStorage.getCheckedIngredients(recipeId).then((stored) => {
+      setCheckedIds(new Set(stored));
+      setIsLoading(false);
+    });
+  }, [recipeId]);
 
   const toggleIngredient = useCallback(
     (ingredientId: string) => {
@@ -16,6 +22,7 @@ export function useIngredientChecks(recipeId: string) {
         } else {
           newSet.add(ingredientId);
         }
+        // Persister de manière async
         recipeStorage.setCheckedIngredients(recipeId, [...newSet]);
         return newSet;
       });
@@ -33,5 +40,5 @@ export function useIngredientChecks(recipeId: string) {
     [checkedIds]
   );
 
-  return { checkedIds, toggleIngredient, clearAll, isChecked };
+  return { checkedIds, toggleIngredient, clearAll, isChecked, isLoading };
 }

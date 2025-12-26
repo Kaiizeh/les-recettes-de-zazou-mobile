@@ -50,7 +50,6 @@ export default function RecipeDetailScreen() {
 
       {/* Header overlay */}
       <RecipeDetailHeader
-        title={recipe.name}
         isFavorite={isFavorite}
         onToggleFavorite={handleToggleFavorite}
       />
@@ -65,38 +64,48 @@ export default function RecipeDetailScreen() {
         {/* Hero image */}
         <RecipeHeroImage imageUrl={recipe.imageUrl} scrollY={scrollY} />
 
-        {/* Info section */}
-        <RecipeInfoSection
-          prepTimeMinutes={recipe.prepTimeMinutes}
-          cookTimeMinutes={recipe.cookTimeMinutes}
-          rating={recipe.rating}
-          ratingCount={recipe.ratingCount}
-          difficulty={recipe.difficulty}
-          isThermomixCompatible={recipe.isThermomixCompatible}
-        />
+        {/* Content container with bottom sheet effect */}
+        <View className="-mt-6 rounded-t-3xl bg-background">
+          {/* Handle bar */}
+          <View className="mx-auto mt-3 mb-4 h-1 w-10 rounded-full bg-muted" />
 
-        {/* Portions selector */}
-        <PortionsSelector value={portions} onChange={setPortions} />
+          {/* Title */}
+          <Text
+            className="mb-3 px-4 text-2xl text-foreground"
+            style={{ fontFamily: 'PlayfairDisplay_700Bold' }}
+          >
+            {recipe.name}
+          </Text>
 
-        {/* Description */}
-        {recipe.description && (
-          <View className="px-4 py-4">
-            <Text className="text-base leading-relaxed text-muted-foreground">
-              {recipe.description}
-            </Text>
-          </View>
-        )}
+          {/* Info section */}
+          <RecipeInfoSection
+            totalTimeMinutes={recipe.totalTimeMinutes}
+            difficulty={recipe.difficulty}
+          />
 
-        {/* Ingredients */}
-        <IngredientsList
-          ingredients={recipe.ingredients}
-          portions={portions}
-          originalPortions={recipe.originalPortions}
-          recipeId={recipe.id}
-        />
+          {/* Portions selector */}
+          <PortionsSelector value={portions} onChange={setPortions} />
 
-        {/* Steps */}
-        <StepsList steps={recipe.steps} />
+          {/* Description */}
+          {recipe.description && (
+            <View className="px-4 py-4">
+              <Text className="text-base leading-relaxed text-muted-foreground">
+                {recipe.description}
+              </Text>
+            </View>
+          )}
+
+          {/* Ingredients */}
+          <IngredientsList
+            ingredients={recipe.ingredients}
+            portions={portions}
+            originalPortions={recipe.originalPortions}
+            recipeId={recipe.id}
+          />
+
+          {/* Steps */}
+          <StepsList steps={recipe.steps} />
+        </View>
       </Animated.ScrollView>
 
       {/* Floating CTA */}

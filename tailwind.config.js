@@ -7,6 +7,11 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
+      fontFamily: {
+        playfair: ['PlayfairDisplay_400Regular'],
+        'playfair-medium': ['PlayfairDisplay_500Medium'],
+        'playfair-bold': ['PlayfairDisplay_700Bold'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

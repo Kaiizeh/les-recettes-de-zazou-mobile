@@ -1,21 +1,19 @@
-import { MMKV } from 'react-native-mmkv';
-
-export const storage = new MMKV();
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const recipeStorage = {
-  getCheckedIngredients: (recipeId: string): string[] => {
+  getCheckedIngredients: async (recipeId: string): Promise<string[]> => {
     const key = `recipe_${recipeId}_ingredients_checked`;
-    const data = storage.getString(key);
+    const data = await AsyncStorage.getItem(key);
     return data ? JSON.parse(data) : [];
   },
 
-  setCheckedIngredients: (recipeId: string, ids: string[]) => {
+  setCheckedIngredients: async (recipeId: string, ids: string[]) => {
     const key = `recipe_${recipeId}_ingredients_checked`;
-    storage.set(key, JSON.stringify(ids));
+    await AsyncStorage.setItem(key, JSON.stringify(ids));
   },
 
-  clearCheckedIngredients: (recipeId: string) => {
+  clearCheckedIngredients: async (recipeId: string) => {
     const key = `recipe_${recipeId}_ingredients_checked`;
-    storage.delete(key);
+    await AsyncStorage.removeItem(key);
   },
 };
