@@ -3,7 +3,7 @@ import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
 } from 'react-native-reanimated';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Text } from '@/components/ui/text';
 import { RecipeDetailHeader } from '@/components/recipes/detail/RecipeDetailHeader';
@@ -17,11 +17,18 @@ import { MOCK_RECIPES } from '@/data/mockRecipes';
 
 export default function RecipeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const recipe = MOCK_RECIPES.find((r) => r.id === id);
 
   const [portions, setPortions] = useState(recipe?.originalPortions ?? 4);
   const [isFavorite, setIsFavorite] = useState(recipe?.isFavorite ?? false);
   const scrollY = useSharedValue(0);
+
+  const hasSteps = (recipe?.steps.length ?? 0) > 0;
+
+  const handleStartCooking = () => {
+    router.push(`/recipe/${id}/cooking`);
+  };
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -109,7 +116,7 @@ export default function RecipeDetailScreen() {
       </Animated.ScrollView>
 
       {/* Floating CTA */}
-      <FloatingCTAButton disabled />
+      <FloatingCTAButton disabled={!hasSteps} onPress={handleStartCooking} />
     </View>
   );
 }

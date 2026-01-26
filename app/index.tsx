@@ -9,12 +9,14 @@ import { Stack, router } from 'expo-router';
 import { MoonStarIcon, SunIcon } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useState, useEffect } from 'react';
-import { View, SafeAreaView } from 'react-native';
+import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { Recipe } from '@/types/recipe';
 
 export default function HomeScreen() {
   const { colorScheme } = useColorScheme();
   const [isLoading, setIsLoading] = useState(true);
+  const insets = useSafeAreaInsets();
 
   const {
     searchQuery,
@@ -37,7 +39,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
       <Stack.Screen
         options={{
           headerShown: true,
@@ -72,7 +74,7 @@ export default function HomeScreen() {
           onResetFilters={clearFilters}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
