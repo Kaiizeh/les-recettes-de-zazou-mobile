@@ -1,9 +1,9 @@
-import { Redirect } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import type { Href } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { View, ActivityIndicator } from 'react-native';
 
-export default function Index() {
+export default function AuthLayout() {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
@@ -14,9 +14,18 @@ export default function Index() {
     );
   }
 
+  // Redirect to app if already authenticated
   if (isAuthenticated) {
     return <Redirect href={'/(app)' as Href} />;
   }
 
-  return <Redirect href={'/(auth)/login' as Href} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: 'transparent' },
+        animation: 'slide_from_right',
+      }}
+    />
+  );
 }

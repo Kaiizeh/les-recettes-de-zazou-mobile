@@ -2,9 +2,9 @@
 
 ## 📋 Informations Générales
 
-**Nom du projet** : Recipe App  
-**Version** : 1.0.0 (MVP)  
-**Date** : 08/11/2025  
+**Nom du projet** : Les Recettes de Zazou  
+**Version** : 2.0.0 (MVP)  
+**Date** : 2025-01-XX  
 **Type** : Application mobile React Native (iOS & Android)  
 **Mode** : Offline-first avec synchronisation automatique
 
@@ -73,7 +73,7 @@ Permettre à un utilisateur existant de se connecter à l'application.
 
 ### 1.2 Layout
 - **Orientation** : Portrait uniquement
-- **Header** : Logo de l'application + titre "Connexion"
+- **Header** : Logo de l'application + titre "Connexion" / "Login"
 - **Contenu** : Formulaire centré verticalement
 
 ### 1.3 Composants
@@ -115,10 +115,10 @@ Permettre à un utilisateur existant de se connecter à l'application.
 
 #### Gestion des erreurs
 **Erreurs possibles** :
-- Email invalide → "Format d'email invalide"
-- Mot de passe trop court → "Le mot de passe doit contenir au moins 6 caractères"
-- Identifiants incorrects (API) → Toast rouge : "Email ou mot de passe incorrect"
-- Erreur réseau → Toast rouge : "Impossible de se connecter. Vérifiez votre connexion."
+- Email invalide → "Format d'email invalide" / "Invalid email format"
+- Mot de passe trop court → "Le mot de passe doit contenir au moins 6 caractères" / "Password must be at least 6 characters"
+- Identifiants incorrects (API) → Toast rouge : "Email ou mot de passe incorrect" / "Invalid email or password"
+- Erreur réseau → Toast rouge : "Impossible de se connecter. Vérifiez votre connexion." / "Unable to connect. Check your connection."
 
 #### Toggle mot de passe
 - Icône œil à droite du champ
@@ -128,11 +128,41 @@ Permettre à un utilisateur existant de se connecter à l'application.
 - Clic sur "S'inscrire" → Navigation vers écran Register
 - Connexion réussie → Navigation vers Home (Tab Navigation)
 
-### 1.5 Persistance
-- Session persistante : L'utilisateur reste connecté après fermeture de l'app
-- Token stocké dans MMKV (sécurisé)
+### 1.5 Flow d'authentification (API .NET)
 
-### 1.6 États de l'écran
+```
+┌─────────────┐         ┌─────────────┐
+│   Mobile    │         │  API .NET   │
+└──────┬──────┘         └──────┬──────┘
+       │                       │
+       │ POST /api/auth/login  │
+       │ { email, password }   │
+       │──────────────────────►│
+       │                       │
+       │ 200 OK                │
+       │ { user, accessToken,  │
+       │   refreshToken,       │
+       │   expiresIn }         │
+       │◄──────────────────────│
+       │                       │
+       │ Stockage MMKV :       │
+       │ - accessToken         │
+       │ - refreshToken        │
+       │ - user                │
+       │                       │
+```
+
+**Tokens** :
+- **Access Token** : Durée de vie 15 minutes
+- **Refresh Token** : Durée de vie 7 jours
+- **Stockage** : MMKV (chiffré)
+
+### 1.6 Persistance
+- Session persistante : L'utilisateur reste connecté après fermeture de l'app
+- Tokens stockés dans MMKV (sécurisé)
+- Refresh automatique du token avant expiration
+
+### 1.7 États de l'écran
 1. **Par défaut** : Formulaire vide, bouton actif
 2. **Validation** : Messages d'erreur inline si champs invalides
 3. **Loading** : Bouton avec spinner, champs désactivés
@@ -147,7 +177,7 @@ Permettre à un nouvel utilisateur de créer un compte.
 
 ### 2.2 Layout
 - **Orientation** : Portrait uniquement
-- **Header** : Logo de l'application + titre "Inscription"
+- **Header** : Logo de l'application + titre "Inscription" / "Sign Up"
 - **Contenu** : Formulaire centré verticalement
 
 ### 2.3 Composants
@@ -158,7 +188,7 @@ Permettre à un nouvel utilisateur de créer un compte.
 │   [Logo App]                    │
 │   Inscription                   │
 │                                 │
-│   Nom d'utilisateur             │
+│   Nom d'affichage               │
 │   [____________________]        │
 │   {Message d'erreur inline}     │
 │                                 │
@@ -185,8 +215,8 @@ Permettre à un nouvel utilisateur de créer un compte.
 
 | Champ | Type | Règles de validation | Requis |
 |-------|------|---------------------|--------|
-| Nom d'utilisateur | Text input | Min 3 caractères, alphanumérique | ✅ |
-| Email | Email input | Format email valide | ✅ |
+| Nom d'affichage | Text input | Min 3 caractères, max 50 | ✅ |
+| Email | Email input | Format email valide, unique | ✅ |
 | Mot de passe | Password input | Min 6 caractères | ✅ |
 | Confirmation mot de passe | Password input | Doit correspondre au mot de passe | ✅ |
 
@@ -194,16 +224,31 @@ Permettre à un nouvel utilisateur de créer un compte.
 
 #### Gestion des erreurs
 **Erreurs possibles** :
-- Username trop court → "Le nom d'utilisateur doit contenir au moins 3 caractères"
-- Username non alphanumérique → "Le nom d'utilisateur ne peut contenir que des lettres et chiffres"
-- Email invalide → "Format d'email invalide"
-- Email déjà utilisé (API) → Toast rouge : "Cet email est déjà utilisé"
-- Mot de passe trop court → "Le mot de passe doit contenir au moins 6 caractères"
-- Mots de passe différents → "Les mots de passe ne correspondent pas"
+- Nom trop court → "Le nom doit contenir au moins 3 caractères" / "Name must be at least 3 characters"
+- Nom trop long → "Le nom ne peut pas dépasser 50 caractères" / "Name cannot exceed 50 characters"
+- Email invalide → "Format d'email invalide" / "Invalid email format"
+- Email déjà utilisé (API) → Toast rouge : "Cet email est déjà utilisé" / "This email is already in use"
+- Mot de passe trop court → "Le mot de passe doit contenir au moins 6 caractères" / "Password must be at least 6 characters"
+- Mots de passe différents → "Les mots de passe ne correspondent pas" / "Passwords do not match"
+
+#### Flow d'inscription (API .NET)
+
+```
+POST /api/auth/register
+Body: { email, password, displayName }
+
+Response 201:
+{
+  "user": { "id": "guid", "email": "...", "displayName": "..." },
+  "accessToken": "jwt...",
+  "refreshToken": "...",
+  "expiresIn": 900
+}
+```
 
 #### Navigation
 - Clic sur "Se connecter" → Navigation vers écran Login
-- Inscription réussie → Toast vert "Compte créé avec succès" + Navigation vers Home
+- Inscription réussie → Toast vert "Compte créé avec succès" / "Account created successfully" + Navigation vers Home
 
 ---
 
@@ -214,7 +259,7 @@ Afficher la liste de toutes les recettes avec possibilité de filtrer, recherche
 
 ### 3.2 Layout
 - **Orientation** : Portrait
-- **Header** : Titre "Recettes" + Barre de recherche
+- **Header** : Titre "Recettes" / "Recipes" + Barre de recherche
 - **Contenu** : 
   - Section filtres (tags badges)
   - Liste de recettes cards (scroll vertical infini)
@@ -266,12 +311,12 @@ Afficher la liste de toutes les recettes avec possibilité de filtrer, recherche
 
 | Élément | Description | Format |
 |---------|-------------|--------|
-| Image | Photo principale de la recette | Ratio 16:9 |
+| Image | Photo principale de la recette (URL MinIO) | Ratio 16:9 |
 | Nom | Titre de la recette | 1-2 lignes max (ellipsis) |
 | Temps | Temps total (préparation + cuisson) | "X min" |
-| Difficulté | Facile / Moyen / Difficile | Badge coloré |
+| Difficulté | Easy / Medium / Hard | Badge coloré + traduction |
 | Note moyenne | Rating moyen | Étoiles + nombre (ex: 4.5) |
-| Badge Thermomix | Icône mixer | Visible si compatible |
+| Badge Thermomix | Icône mixer | Visible si tag "thermomix" |
 | Badge Offline | Icône téléchargement | Visible si recette fully cached |
 | Favori | Icône cœur | Rempli si en favori |
 
@@ -279,14 +324,14 @@ Afficher la liste de toutes les recettes avec possibilité de filtrer, recherche
 
 #### Recherche
 - **Déclenchement** : Recherche lancée après 300ms d'inactivité (debounce)
-- **Champ de recherche** : Nom de la recette (case-insensitive)
+- **Champ de recherche** : Nom et description de la recette (côté API)
 - **Comportement** : Fonctionne en parallèle des filtres tags (cumul des conditions)
 
 #### Filtres par Tags
 - **Sélection** : Tap sur un badge
 - **Multi-sélection** : Possible
 - **Logique** : ET (recette doit avoir TOUS les tags sélectionnés)
-- **Réinitialisation** : Bouton "Effacer les filtres" si au moins 1 filtre actif
+- **Réinitialisation** : Bouton "Effacer les filtres" / "Clear filters" si au moins 1 filtre actif
 
 #### Tri par défaut
 - **Ordre** : Par note moyenne décroissante (meilleures notes en premier)
@@ -295,6 +340,21 @@ Afficher la liste de toutes les recettes avec possibilité de filtrer, recherche
 - **Pagination** : Chargement automatique au scroll
 - **Seuil** : Quand l'utilisateur arrive à 80% du bas de la liste
 - **Loader** : Spinner en bas de liste pendant chargement
+
+#### Appel API
+
+```
+GET /api/recipes?page=1&limit=20&search=tarte&tags=dessert&tags=fruits&difficulty=Easy&sortBy=averageRating&sortOrder=desc
+
+Response:
+{
+  "data": [...],
+  "page": 1,
+  "limit": 20,
+  "total": 156,
+  "totalPages": 8
+}
+```
 
 #### État vide
 **Aucun résultat de recherche/filtres** :
@@ -315,9 +375,9 @@ Afficher la liste de toutes les recettes avec possibilité de filtrer, recherche
 - **Skeleton** : Affichage de 6 cards en skeleton (placeholder animé)
 
 #### Mode offline
-- **Indicateur offline** : Badge "📡 Offline" dans le header
+- **Indicateur offline** : Badge "📡 Offline" / "📡 Hors ligne" dans le header
 - **Comportement** : Affichage des recettes en cache uniquement
-- **Message** : Toast info : "Mode hors ligne - Recettes limitées au cache"
+- **Message** : Toast info : "Mode hors ligne - Recettes limitées au cache" / "Offline mode - Limited to cached recipes"
 
 ---
 
@@ -330,7 +390,7 @@ Afficher le détail complet d'une recette : informations, ingrédients, étapes,
 - **Orientation** : Portrait
 - **Header** : Bouton retour + titre recette + icône favori
 - **Contenu** : Scroll vertical
-- **Bouton flottant** : "Commencer la recette" (fixed en bas)
+- **Bouton flottant** : "Commencer la recette" / "Start cooking" (fixed en bas)
 
 ### 4.3 Structure de la page
 
@@ -391,11 +451,49 @@ Afficher le détail complet d'une recette : informations, ingrédients, étapes,
 #### Checkboxes ingrédients
 - **Tap** → Toggle checked/unchecked
 - **État checked** → Texte barré + opacité réduite
-- **Persistance** : Sauvegardé localement (MMKV)
+- **Persistance** : Sauvegardé localement (MMKV) par recette
 
 #### Restriction Commentaires
 - **Lecture seule** : L'utilisateur peut voir mais pas commenter
-- **Condition** : Doit réaliser la recette pour laisser un avis
+- **Condition** : Doit **terminer le mode réalisation** (pas-à-pas complet) pour laisser un avis
+- **Message si non éligible** : "Réalisez cette recette pour laisser un avis" / "Complete this recipe to leave a review"
+
+#### Appel API
+
+```
+GET /api/recipes/{id}
+
+Response:
+{
+  "id": "guid",
+  "title": "...",
+  "description": "...",
+  "difficulty": "Medium",
+  "prepTime": 15,
+  "cookTime": 30,
+  "servings": 4,
+  "ingredients": [...],
+  "steps": [...],
+  "images": ["https://storage.recettes-zazou.fr/recipe-images/..."],
+  "tags": [...],
+  "averageRating": 4.5,
+  "ratingsCount": 24
+}
+
+GET /api/recipes/{id}/comments
+
+Response:
+{
+  "data": [
+    {
+      "id": "guid",
+      "content": "...",
+      "createdAt": "...",
+      "user": { "id": "...", "displayName": "Marie" }
+    }
+  ]
+}
+```
 
 ---
 
@@ -453,7 +551,7 @@ Guider l'utilisateur étape par étape dans la réalisation de la recette avec u
 - Format : `●●●●●○○○○` (étapes accomplies vs futures)
 
 #### Timer
-- **Affichage** : Coin supérieur droit si durée définie
+- **Affichage** : Coin supérieur droit si durée définie pour l'étape
 - **Lancement** : Manuel (tap sur timer)
 - **États** : Non démarré / En cours / Pause / Terminé
 - **Terminé** : Vibration + son + "00:00" clignotant
@@ -464,11 +562,11 @@ Guider l'utilisateur étape par étape dans la réalisation de la recette avec u
 |--------|--------------|
 | Retour Homepage (bouton Quitter) | Progression **réinitialisée** |
 | App en background | Progression **sauvegardée** |
-| Retour sur recette | Prompt "Reprendre la recette ?" |
+| Retour sur recette | Prompt "Reprendre la recette ?" / "Resume recipe?" |
 
 #### Bouton Quitter
 - **Tap** : Modale de confirmation
-- **Modale** : "Quitter la recette ? Votre progression sera perdue."
+- **Modale** : "Quitter la recette ? Votre progression sera perdue." / "Leave recipe? Your progress will be lost."
 - **Actions** : Annuler / Quitter
 
 ### 5.5 Dernière Étape - Écran de Complétion
@@ -480,6 +578,7 @@ Guider l'utilisateur étape par étape dans la réalisation de la recette avec u
 │           🎉                    │
 │                                 │
 │    Recette terminée !           │
+│    Recipe completed!            │
 │                                 │
 │ Qu'avez-vous pensé de           │
 │ cette recette ?                 │
@@ -497,12 +596,26 @@ Guider l'utilisateur étape par étape dans la réalisation de la recette avec u
 
 **Comportements** :
 - Note + commentaire optionnels
-- "Passer" → Retour RecipeDetail sans noter
-- "Envoyer" → Envoi + retour RecipeDetail
+- "Passer" / "Skip" → Retour RecipeDetail sans noter (mais marque la recette comme "réalisée")
+- "Envoyer" / "Submit" → Envoi + retour RecipeDetail
+
+**Marquage "Recette réalisée"** :
+- Stocké localement (MMKV) : liste des IDs de recettes terminées
+- Débloque la possibilité de commenter/noter cette recette ultérieurement
+
+**Appel API (si note/commentaire)** :
+
+```
+POST /api/ratings
+Body: { recipeId: "guid", score: 5 }
+
+POST /api/comments
+Body: { recipeId: "guid", content: "Excellente recette !" }
+```
 
 **Gestion Offline** :
-- Si offline : Ajout à la queue de synchronisation
-- Toast : "Votre avis sera envoyé dès la reconnexion"
+- Si offline : Ajout à la queue de synchronisation (Zustand + MMKV)
+- Toast : "Votre avis sera envoyé dès la reconnexion" / "Your review will be sent when back online"
 
 ---
 
@@ -515,25 +628,22 @@ Gérer le profil, les préférences et la déconnexion.
 
 ```
 ┌─────────────────────────────────┐
-│ Paramètres                      │
+│ Paramètres / Settings           │
 ├─────────────────────────────────┤
 │ Section: Profil                 │
 │                                 │
-│ Nom d'utilisateur               │
+│ Nom d'affichage                 │
 │ [marie_cuisine] [✏️]            │
 │                                 │
 │ Email                           │
 │ marie@example.com (non éditable)│
-│                                 │
-│ Mot de passe                    │
-│ •••••••• [Modifier]             │
 ├─────────────────────────────────┤
 │ Section: Préférences            │
 │                                 │
-│ Langue                          │
+│ Langue / Language               │
 │ Français          [→]           │
 │                                 │
-│ Thème                           │
+│ Thème / Theme                   │
 │ Automatique       [→]           │
 │                                 │
 │ Maintenir l'écran allumé        │
@@ -541,7 +651,7 @@ Gérer le profil, les préférences et la déconnexion.
 ├─────────────────────────────────┤
 │ Section: À propos               │
 │                                 │
-│ Version: 1.0.0                  │
+│ Version: 2.0.0                  │
 │ Conditions d'utilisation        │
 │ Politique de confidentialité    │
 ├─────────────────────────────────┤
@@ -552,28 +662,29 @@ Gérer le profil, les préférences et la déconnexion.
 
 ### 6.3 Comportements
 
-#### Modification username
+#### Modification nom d'affichage
 - **Tap sur ✏️** : Ouvre modale d'édition
-- **Validation** : Min 3 caractères, alphanumérique
-- **Vérification** : À la soumission (appel API)
+- **Validation** : Min 3 caractères, max 50 caractères
+- **Appel API** : `PUT /api/users/me { displayName: "..." }`
 
-#### Modification mot de passe
-- **Tap "Modifier"** : Ouvre modale
-- **Champs** : Nouveau mot de passe + Confirmation
-- **Validation** : Min 6 caractères, correspondance
+#### Sélection Langue
+- **Options** : Français / English
+- **Application** : Immédiate (re-render de l'app)
+- **Sauvegarde** : MMKV + persiste au redémarrage
 
 #### Thème
-- **Options** : Automatique / Clair / Sombre
+- **Options** : Automatique / Clair / Sombre (Auto / Light / Dark)
 - **Application** : Immédiate avec preview
 - **Sauvegarde** : MMKV
 
 #### Déconnexion
-- **Confirmation** : Modale "Se déconnecter ?"
+- **Confirmation** : Modale "Se déconnecter ?" / "Log out?"
 - **Actions** :
-  1. Sync données en attente (si online)
-  2. Suppression token
-  3. Clear cache
-  4. Navigation Login
+  1. Appel API : `POST /api/auth/logout`
+  2. Sync données en attente (si online)
+  3. Suppression tokens (MMKV)
+  4. Clear cache TanStack Query
+  5. Navigation Login
 
 ---
 
@@ -583,15 +694,15 @@ Gérer le profil, les préférences et la déconnexion.
 
 **Carrousel de 4 slides** (première ouverture) :
 
-1. **Bienvenue** - Présentation de l'app
-2. **Recherche & Filtres** - Trouver des recettes
-3. **Mode Recette** - Cuisiner en mode guidé
-4. **Mode Offline** - Disponibilité hors ligne
+1. **Bienvenue** - Présentation de l'app / Welcome - App presentation
+2. **Recherche & Filtres** - Trouver des recettes / Find recipes
+3. **Mode Recette** - Cuisiner en mode guidé / Cook step by step
+4. **Mode Offline** - Disponibilité hors ligne / Offline availability
 
 **Actions** :
-- Navigation entre slides
-- Bouton "Passer" en haut à droite
-- "Commencer" sur dernière slide
+- Navigation entre slides (swipe ou dots)
+- Bouton "Passer" / "Skip" en haut à droite
+- "Commencer" / "Get Started" sur dernière slide
 
 ### 7.2 Tutorial Mode Recette
 
@@ -601,7 +712,7 @@ Gérer le profil, les préférences et la déconnexion.
 2. **Barre de progression** - Comment l'afficher/masquer
 3. **Timer** - Comment le démarrer
 
-**Réaffichage** : Bouton "Revoir le tutorial" dans Settings
+**Réaffichage** : Bouton "Revoir le tutorial" / "View tutorial again" dans Settings
 
 ---
 
@@ -614,8 +725,15 @@ Gérer le profil, les préférences et la déconnexion.
 - Tap → Toggle + animation bounce
 - Toast feedback
 
+**Appels API** :
+```
+POST /api/favorites/{recipeId}   # Ajouter
+DELETE /api/favorites/{recipeId} # Retirer
+GET /api/favorites               # Liste
+```
+
 **Page Favoris** :
-- Accessible via icône dans Homepage header
+- Accessible via icône cœur dans Homepage header
 - Layout identique à Homepage
 - Filtres/recherche disponibles
 
@@ -631,7 +749,7 @@ Gérer le profil, les préférences et la déconnexion.
 
 **Badge dans header** :
 ```
-[📡 Offline]  ou  [⚠️ Mode hors ligne]
+[📡 Hors ligne]  ou  [📡 Offline]
 ```
 
 - Couleur : Jaune/Orange
@@ -642,12 +760,12 @@ Gérer le profil, les préférences et la déconnexion.
 
 #### Toasts
 
-| Type | Couleur | Durée | Exemple |
-|------|---------|-------|---------|
-| Succès | Vert | 3s | "Recette ajoutée aux favoris" |
-| Erreur | Rouge | 4s | "Erreur de connexion" |
-| Info | Bleu | 3s | "Mode hors ligne activé" |
-| Warning | Orange | 3s | "Données non synchronisées" |
+| Type | Couleur | Durée | Exemple FR | Exemple EN |
+|------|---------|-------|------------|------------|
+| Succès | Vert | 3s | "Recette ajoutée aux favoris" | "Recipe added to favorites" |
+| Erreur | Rouge | 4s | "Erreur de connexion" | "Connection error" |
+| Info | Bleu | 3s | "Mode hors ligne activé" | "Offline mode enabled" |
+| Warning | Orange | 3s | "Données non synchronisées" | "Data not synced" |
 
 #### Skeleton Screens
 - Homepage : 6 cards
@@ -664,16 +782,54 @@ Message descriptif
 
 ---
 
-## 10. 🔐 Sécurité & Permissions
+## 10. 🔐 Sécurité & Authentification
 
-### 10.1 Authentification
+### 10.1 Flow de Tokens
 
-- **Token JWT** : Stocké dans MMKV (encrypted)
-- **Expiration** : 7 jours
-- **Refresh** : Automatique via Supabase Auth
-- **Session** : Persistante après fermeture app
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Cycle de vie des tokens               │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  Login/Register                                         │
+│       │                                                 │
+│       ▼                                                 │
+│  ┌─────────────────┐                                    │
+│  │  Access Token   │  Durée: 15 minutes                 │
+│  │  (JWT)          │  Usage: Header Authorization       │
+│  └────────┬────────┘                                    │
+│           │                                             │
+│           │ Expiration proche (< 1 min)                 │
+│           ▼                                             │
+│  ┌─────────────────┐                                    │
+│  │  Refresh Token  │  Durée: 7 jours                    │
+│  │                 │  Endpoint: POST /api/auth/refresh  │
+│  └────────┬────────┘                                    │
+│           │                                             │
+│           ▼                                             │
+│  Nouveaux Access + Refresh Tokens                       │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
 
-### 10.2 Permissions Requises
+### 10.2 Gestion automatique des tokens
+
+- **Intercepteur Axios** : Vérifie expiration avant chaque requête
+- **Refresh automatique** : Si access token expire dans < 1 minute
+- **Queue de requêtes** : Les requêtes en attente sont rejouées après refresh
+- **Échec refresh** : Déconnexion automatique + redirection Login
+
+### 10.3 Stockage sécurisé
+
+| Donnée | Stockage | Chiffré |
+|--------|----------|---------|
+| Access Token | MMKV | ✅ |
+| Refresh Token | MMKV | ✅ |
+| User Info | MMKV | ✅ |
+| Préférences | MMKV | ❌ |
+| Cache recettes | MMKV (TanStack Query persister) | ❌ |
+
+### 10.4 Permissions Requises
 
 | Permission | Usage |
 |------------|-------|
@@ -687,26 +843,30 @@ Message descriptif
 
 ### 11.1 Événements Utilisateur
 
-- `app_opened` - Ouverture app
-- `recipe_viewed` - Consultation recette
-- `recipe_started` - Lancement mode recette
-- `recipe_completed` - Fin recette
-- `recipe_rated` - Note donnée
-- `recipe_commented` - Commentaire posté
-- `recipe_favorited` - Toggle favori
-- `search_performed` - Recherche lancée
-- `filter_applied` - Filtre appliqué
+| Événement | Description |
+|-----------|-------------|
+| `app_opened` | Ouverture app |
+| `recipe_viewed` | Consultation recette |
+| `recipe_started` | Lancement mode recette |
+| `recipe_completed` | Fin recette (toutes étapes) |
+| `recipe_rated` | Note donnée |
+| `recipe_commented` | Commentaire posté |
+| `recipe_favorited` | Toggle favori |
+| `search_performed` | Recherche lancée |
+| `filter_applied` | Filtre appliqué |
+| `language_changed` | Changement de langue |
 
 ### 11.2 Événements Techniques
 
-- `offline_mode_entered` - Passage offline
-- `sync_started` / `sync_completed` / `sync_failed`
-- `cache_hit` / `cache_miss`
-
-### 11.3 Outils Recommandés
-
-**MVP** : Expo Analytics (basique)
-**Production** : Mixpanel/Amplitude + Sentry
+| Événement | Description |
+|-----------|-------------|
+| `offline_mode_entered` | Passage offline |
+| `sync_started` | Début sync |
+| `sync_completed` | Fin sync réussie |
+| `sync_failed` | Échec sync |
+| `token_refreshed` | Refresh token effectué |
+| `cache_hit` | Donnée servie depuis cache |
+| `cache_miss` | Donnée fetchée depuis API |
 
 ---
 
@@ -717,26 +877,90 @@ Message descriptif
 - Screen readers (VoiceOver, TalkBack)
 
 ### 12.2 Pratiques
-- Tous les boutons ont un `accessibilityLabel`
+- Tous les boutons ont un `accessibilityLabel` traduit
 - Contraste minimum 4.5:1 pour texte
 - Tailles tactiles minimum 44x44 points
 - Feedback visuel + haptic
+- Labels traduits selon la langue sélectionnée
 
 ---
 
-## 13. 🌍 Internationalisation
+## 13. 🌍 Internationalisation (i18n)
 
 ### 13.1 Configuration
-- **Langue par défaut** : Français
-- **Langues MVP** : Français uniquement
-- **Phase 2** : Anglais
+- **Langues supportées** : Français (défaut), English
+- **Détection** : Langue système au premier lancement
+- **Changement** : Settings > Langue
+- **Persistance** : MMKV
 
-### 13.2 Structure
+### 13.2 Structure des traductions
 ```
 /src/lib/i18n/
-  ├─ index.ts
-  ├─ fr.json
-  └─ en.json (Phase 2)
+  ├─ index.ts       # Configuration react-i18next
+  ├─ fr.json        # Traductions françaises
+  └─ en.json        # Traductions anglaises
+```
+
+### 13.3 Éléments traduits
+- Tous les textes de l'interface (boutons, labels, titres)
+- Messages d'erreur
+- Toasts et notifications
+- Placeholders des champs
+- Messages d'état vide
+
+### 13.4 Éléments NON traduits
+- Contenu des recettes (titre, description, ingrédients, étapes)
+- Noms des tags (gérés côté back-office)
+- Commentaires des utilisateurs
+
+### 13.5 Exemple de clés
+```json
+// fr.json
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "Inscription",
+    "email": "Email",
+    "password": "Mot de passe",
+    "loginButton": "Se connecter",
+    "registerButton": "S'inscrire",
+    "noAccount": "Pas de compte ?",
+    "hasAccount": "Déjà un compte ?"
+  },
+  "recipes": {
+    "title": "Recettes",
+    "search": "Rechercher une recette...",
+    "filters": "Filtres",
+    "clearFilters": "Effacer les filtres",
+    "noResults": "Aucune recette trouvée",
+    "difficulty": {
+      "easy": "Facile",
+      "medium": "Moyen",
+      "hard": "Difficile"
+    }
+  },
+  "cooking": {
+    "start": "Commencer la recette",
+    "step": "Étape",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "complete": "Recette terminée !",
+    "leaveConfirm": "Quitter la recette ? Votre progression sera perdue."
+  },
+  "offline": {
+    "badge": "Hors ligne",
+    "message": "Mode hors ligne - Recettes limitées au cache",
+    "syncPending": "Votre avis sera envoyé dès la reconnexion"
+  }
+}
 ```
 
 ---
@@ -746,15 +970,16 @@ Message descriptif
 ### 14.1 MVP (Phase 1) - 3-4 semaines
 
 **Priorité Haute** :
-- ✅ Authentification (Login/Register)
+- ✅ Authentification (Login/Register) via API .NET
 - ✅ Homepage (Liste + Recherche + Filtres)
 - ✅ Fiche recette (Detail)
 - ✅ Mode recette (Réalisation)
-- ✅ Notes & Commentaires (post-réalisation)
+- ✅ Notes & Commentaires (post-réalisation uniquement)
 - ✅ Mode offline (cache + sync)
 - ✅ Favoris
 - ✅ Settings
 - ✅ Onboarding & Tutorial
+- ✅ Internationalisation (FR + EN)
 
 ### 14.2 Phase 2 (Post-MVP)
 
@@ -762,10 +987,9 @@ Message descriptif
 - Photo de profil
 - Mot de passe oublié
 - Partage de recettes
-- Listes de courses
+- Listes de courses générées
 - Notifications push
-- Widget
-- Langue anglaise
+- Widget iOS/Android
 - Deep linking
 
 ---
@@ -778,74 +1002,127 @@ Message descriptif
 | Langage | TypeScript (strict) |
 | Styling | NativeWind v4 |
 | Navigation | React Navigation v6 |
-| State | Zustand + Context API |
-| Server State | TanStack Query v5 |
-| Storage | MMKV |
+| State local | Zustand v4 |
+| State serveur | TanStack Query v5 |
+| Storage local | MMKV |
 | Forms | React Hook Form + Zod |
-| API | Axios (REST) |
-| Backend | Next.js 14+ |
-| Database | PostgreSQL (Supabase) |
-| Auth | Supabase Auth (JWT) |
+| HTTP Client | Axios |
+| Backend | API .NET 10 |
+| Database | PostgreSQL |
+| Auth | ASP.NET Identity + JWT |
+| Storage images | MinIO (S3-compatible) |
 | i18n | react-i18next |
 
 ---
 
 ## 16. 📌 API Endpoints Recap
 
+### Authentification
 ```
-Auth:
-POST   /api/auth/signup
-POST   /api/auth/login
-GET    /api/auth/me
+POST   /api/auth/register    { email, password, displayName }
+POST   /api/auth/login       { email, password }
+POST   /api/auth/refresh     { refreshToken }
+POST   /api/auth/logout      (auth required)
+GET    /api/auth/me          (auth required)
+```
 
-Recipes:
-GET    /api/recipes (pagination, filters, search)
-GET    /api/recipes/:id
+### Recettes
+```
+GET    /api/recipes          ?page&limit&search&tags&difficulty&sortBy&sortOrder
+GET    /api/recipes/{id}
+```
 
-Comments:
-GET    /api/recipes/:id/comments
-POST   /api/comments { recipeId, content }
+### Commentaires
+```
+GET    /api/recipes/{id}/comments
+POST   /api/comments         { recipeId, content }
+DELETE /api/comments/{id}
+```
 
-Ratings:
-POST   /api/ratings { recipeId, score }
+### Notes
+```
+POST   /api/ratings          { recipeId, score }  # Create or Update
+```
 
-Favorites:
+### Favoris
+```
 GET    /api/favorites
-POST   /api/favorites/:recipeId
-DELETE /api/favorites/:recipeId
+POST   /api/favorites/{recipeId}
+DELETE /api/favorites/{recipeId}
+```
 
-User:
+### Utilisateur
+```
 GET    /api/users/me
-PUT    /api/users/me { username?, password? }
+PUT    /api/users/me         { displayName }
+```
 
-Sync:
-POST   /api/sync/batch { comments, ratings }
+### Synchronisation Offline
+```
+POST   /api/sync/batch       { comments: [...], ratings: [...] }
 ```
 
 ---
 
-## 17. ✅ Checklist de Validation MVP
+## 17. 🔄 Synchronisation Offline
+
+### 17.1 Stratégie
+
+**Lectures** : Toujours disponibles via cache TanStack Query (persisté dans MMKV)
+
+**Écritures** : Queue Zustand avec retry automatique
+
+### 17.2 Données mises en queue offline
+
+| Action | Données stockées |
+|--------|-----------------|
+| Ajouter commentaire | `{ localId, recipeId, content, createdAt }` |
+| Noter recette | `{ localId, recipeId, score, createdAt }` |
+| Toggle favori | `{ recipeId, action: 'add' \| 'remove' }` |
+
+### 17.3 Déclencheurs de sync
+
+1. Au démarrage de l'app (si online)
+2. Toutes les 30 minutes (si app active)
+3. Lors de la reconnexion réseau
+4. Manuel (pull-to-refresh)
+5. Avant un logout
+
+### 17.4 Gestion des conflits
+
+- **Commentaires** : Toujours créés (pas de conflit possible)
+- **Ratings** : Le serveur fait un upsert (dernière valeur gagne)
+- **Favoris** : État final déterminé par le serveur
+
+---
+
+## 18. ✅ Checklist de Validation MVP
 
 ### Authentification
 - [ ] Inscription fonctionnelle
 - [ ] Connexion fonctionnelle
+- [ ] Refresh token automatique
 - [ ] Session persistante
-- [ ] Gestion erreurs
+- [ ] Déconnexion avec cleanup
+- [ ] Gestion erreurs (réseau, credentials)
 
 ### Homepage
 - [ ] Liste recettes affichée
+- [ ] Images chargées depuis MinIO
 - [ ] Filtres multi-sélection (logique ET)
-- [ ] Recherche fonctionnelle
+- [ ] Recherche fonctionnelle (debounce)
 - [ ] Infinite scroll
 - [ ] Pull-to-refresh
 - [ ] Skeleton loading
 
 ### Fiche Recette
 - [ ] Informations complètes
+- [ ] Images MinIO
 - [ ] Ajustement portions
-- [ ] Checkboxes ingrédients
+- [ ] Checkboxes ingrédients (persistés)
 - [ ] Notes/commentaires visibles
 - [ ] Bouton "Commencer"
+- [ ] Restriction commentaire si non réalisée
 
 ### Mode Recette
 - [ ] Rotation paysage forcée
@@ -855,6 +1132,7 @@ POST   /api/sync/batch { comments, ratings }
 - [ ] Keep screen awake
 - [ ] Gestion interruption
 - [ ] Écran complétion (note/commentaire)
+- [ ] Marquage "recette réalisée"
 - [ ] Tutorial overlay
 
 ### Favoris
@@ -863,8 +1141,8 @@ POST   /api/sync/batch { comments, ratings }
 - [ ] Sync offline
 
 ### Settings
-- [ ] Édition username
-- [ ] Changement mot de passe
+- [ ] Édition nom d'affichage
+- [ ] Sélection langue (FR/EN)
 - [ ] Sélection thème
 - [ ] Toggle keep awake
 - [ ] Déconnexion avec confirmation
@@ -872,23 +1150,38 @@ POST   /api/sync/batch { comments, ratings }
 ### Offline
 - [ ] Détection réseau
 - [ ] Badge offline visible
-- [ ] Cache recettes
-- [ ] Queue commentaires/notes
+- [ ] Cache recettes (TanStack Query)
+- [ ] Queue commentaires/notes (Zustand)
 - [ ] Sync auto reconnexion
+- [ ] Endpoint batch sync
+
+### Internationalisation
+- [ ] Textes interface en FR
+- [ ] Textes interface en EN
+- [ ] Changement de langue dynamique
+- [ ] Persistance choix langue
 
 ### Général
 - [ ] Onboarding première ouverture
-- [ ] Toasts de feedback
+- [ ] Toasts de feedback (traduits)
 - [ ] Gestion erreurs réseau
 - [ ] Performance (60fps)
 
 ---
 
-**Version** : 1.0  
-**Date** : 08/11/2025  
+**Version** : 2.0  
+**Date** : 2025-01-XX  
 **Statut** : ✅ Prêt pour développement  
+**Changements majeurs v2** :
+- Migration auth vers API .NET (ASP.NET Identity + JWT)
+- Images servies depuis MinIO
+- Ajout internationalisation FR + EN dès le MVP
+- Alignement endpoints avec API .NET
+
+---
+
 **Prochaine étape** : Setup projet + Configuration technique
 
 ---
 
-**Document complet généré avec succès ! 🎉**
+**Document mis à jour avec succès ! 🎉**

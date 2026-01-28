@@ -75,12 +75,12 @@ export default function CompletionScreen() {
           className="mb-2 text-center text-2xl text-foreground"
           style={{ fontFamily: 'PlayfairDisplay_700Bold' }}
         >
-          Recette terminée !
+          Recette terminee !
         </Text>
 
         {/* Subtitle */}
         <Text className="mb-8 text-center text-base text-muted-foreground">
-          Qu'avez-vous pensé de cette recette ?
+          Qu'avez-vous pense de cette recette ?
         </Text>
 
         {/* Star rating */}

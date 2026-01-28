@@ -86,7 +86,7 @@ export default function CookingScreen() {
       <View className="flex-1 items-center justify-center bg-background">
         <Stack.Screen options={{ headerShown: false }} />
         <Text className="text-lg text-muted-foreground">
-          Cette recette n'a pas d'étapes
+          Cette recette n'a pas d'etapes
         </Text>
       </View>
     );

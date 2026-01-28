@@ -1,0 +1,117 @@
+import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
+import { Text } from '@/components/ui/text';
+import { SearchBar } from '@/components/recipes/SearchBar';
+import { FilterTags } from '@/components/recipes/FilterTags';
+import { RecipeList } from '@/components/recipes/RecipeList';
+import { useRecipeFilters } from '@/hooks/useRecipeFilters';
+import { Stack, router } from 'expo-router';
+import { MoonStarIcon, SunIcon, LogOutIcon } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
+import { useState, useEffect } from 'react';
+import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { Recipe } from '@/types/recipe';
+import { useAuth } from '@/contexts/AuthContext';
+
+export default function HomeScreen() {
+  const { colorScheme } = useColorScheme();
+  const { logout } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const insets = useSafeAreaInsets();
+
+  const {
+    searchQuery,
+    setSearchQuery,
+    activeTags,
+    toggleTag,
+    toggleFavorite,
+    clearFilters,
+    filteredRecipes,
+  } = useRecipeFilters();
+
+  // Simulate initial loading
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleRecipePress = (recipe: Recipe) => {
+    router.push(`/recipe/${recipe.id}`);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  return (
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerTitle: () => (
+            <Text className="text-2xl font-bold text-foreground">Recettes</Text>
+          ),
+          headerRight: () => (
+            <View className="flex-row items-center">
+              <ThemeToggle />
+              <Button
+                onPressIn={handleLogout}
+                size="icon"
+                variant="ghost"
+                className="ios:size-9 rounded-full"
+              >
+                <Icon as={LogOutIcon} className="size-5" />
+              </Button>
+            </View>
+          ),
+          headerStyle: {
+            backgroundColor: colorScheme === 'dark' ? '#121212' : '#F5F1EB',
+          },
+          headerShadowVisible: false,
+        }}
+      />
+
+      <View className="flex-1">
+        {/* Search bar */}
+        <View className="px-4 pb-3 pt-2">
+          <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+        </View>
+
+        {/* Filter tags */}
+        <View className="pb-4">
+          <FilterTags activeTags={activeTags} onToggleTag={toggleTag} />
+        </View>
+
+        {/* Recipe list */}
+        <RecipeList
+          recipes={filteredRecipes}
+          isLoading={isLoading}
+          onRecipePress={handleRecipePress}
+          onToggleFavorite={toggleFavorite}
+          onResetFilters={clearFilters}
+        />
+      </View>
+    </View>
+  );
+}
+
+const THEME_ICONS = {
+  light: SunIcon,
+  dark: MoonStarIcon,
+};
+
+function ThemeToggle() {
+  const { colorScheme, toggleColorScheme } = useColorScheme();
+
+  return (
+    <Button
+      onPressIn={toggleColorScheme}
+      size="icon"
+      variant="ghost"
+      className="ios:size-9 rounded-full"
+    >
+      <Icon as={THEME_ICONS[colorScheme ?? 'light']} className="size-5" />
+    </Button>
+  );
+}
